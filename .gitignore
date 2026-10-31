@@ -1,0 +1,19 @@
+# Python virtual environment
+.venv/
+
+# Local model weights
+models/
+
+# Compiled Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment variables / secrets
+.env
+
+# IDE / Editor settings
+.vscode/
+.idea/
+*.swp
+*.swo
