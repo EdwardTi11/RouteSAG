@@ -70,7 +70,7 @@ route_sag/
 ├── main.py            # CLI interface and main execution loop
 ├── model.py           # Local GGUF initialization and DSPy LM wrapper
 ├── router.py          # DSPy classification & dynamic prompt routing
-├── tools.py           # SearXNG search tool integration & fallback handling
+├── search.py           # SearXNG search tool integration & fallback handling
 ├── models/            # Folder containing local .gguf model files
 └── README.md          # Project documentation
 ```
