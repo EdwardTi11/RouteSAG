@@ -71,7 +71,6 @@ route_sag/
 ├── model.py           # Local GGUF initialization and DSPy LM wrapper
 ├── router.py          # DSPy classification & dynamic prompt routing
 ├── tools.py           # SearXNG search tool integration & fallback handling
-├── agent.py           # ReAct module and agent signature definitions
 ├── models/            # Folder containing local .gguf model files
 └── README.md          # Project documentation
 ```
