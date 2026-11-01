@@ -17,9 +17,11 @@ if __name__ == "__main__":
     router = RouteSAGRouter()
     intent = router(question=user_query)
     print(f"[*] Detected Intent: {intent}")
-    
-    # 2. Execute via ReAct agent
-    route_agent = dspy.ReAct(RouteSAGSignature, tools=[searxng_search])
-    result = route_agent(question=user_query)
+
+    if intent == "search":
+        agent = dspy.ReAct(RouteSAGSignature, tools=[searxng_search])
+    else:
+        agent = dspy.Predict(RouteSAGSignature)
+    result = agent(question=user_query)
     
     print(result.answer)

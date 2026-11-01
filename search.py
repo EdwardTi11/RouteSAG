@@ -1,6 +1,7 @@
 import requests
 
 def searxng_search(query: str) -> str:
+    """Perform a search engine query using public SearXNG instances and return the top results."""
     instances = [
         "https://searx.be",
         "https://search.ononoki.org",
