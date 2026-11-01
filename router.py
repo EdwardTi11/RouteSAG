@@ -1,9 +1,8 @@
 import dspy
 
 class QueryIntentSignature(dspy.Signature):
-    """Classify the user query intent to determine execution path."""
     question: str = dspy.InputField(desc="User query or task")
-    intent: str = dspy.OutputField(desc="Category of intent: 'search' (requires live web facts) or 'local' (direct reasoning/coding)")
+    intent: str = dspy.OutputField(desc="Output EXACTLY 'search' if live web data is mandatory, or 'local' if it is a general fact, math, or coding task.")
 
 class RouteSAGRouter(dspy.Module):
     def __init__(self):
