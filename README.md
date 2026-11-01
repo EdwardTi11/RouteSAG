@@ -1,107 +1,94 @@
 # RouteSAG 🌿🤖
 
-**RouteSAG** (Route-based System for Agentic Generation) is an edge-first, privacy-focused AI framework designed to deliver specialized agentic intelligence without relying on massive, energy-intensive cloud data centers or Mixture of Experts (MoE) architectures.
+**RouteSAG** (Route-based System for Agentic Generation) is a lightweight, hybrid AI assistant that combines a local GGUF model with dynamic query routing and live web search via **SearXNG**. 
 
-By pairing a lightweight local model with declarative **DSPy** signatures, dynamic query routing, and real-time open search via **SearXNG**, RouteSAG achieves high-quality specialized reasoning at zero API cost and minimal resource footprint.
+Instead of relying on heavy cloud data centers, RouteSAG uses **DSPy** to route queries intelligently—using local inference for general prompts and a search-enabled ReAct agent only when up-to-date data is required.
 
-## 🌟 Key Features & Philosophy
+---
 
-* **Data Center Alternative:** Built to prove that effective AI specialization can be achieved through clever software architecture (routing and prompt engineering) rather than brute-force hardware scaling.
+## 📐 Architecture & Workflow
 
-* **100% Local & Private:** Powered locally by `llama-cpp-python` using quantized GGUF models (\~3B to 4B parameters), consuming \~2.0 GB RAM/VRAM.
-
-* **Declarative Prompt Orchestration:** Leverages **DSPy** for structured input/output contracts and ReAct agentic reasoning loops.
-
-* **Dynamic Query Routing:** Acts as a lightweight software-level "router" that categorizes tasks (coding, math, local reasoning, live web search) to optimize execution and avoid wasted compute.
-
-* **No API Keys Required:** Uses SearXNG for live web search snippet retrieval without tracking, database caching, or third-party service fees.
-
-## 📐 System Architecture
-
-```
-┌────────────────────────────────────────────────────────────────────────┐
-│                        1. USER INPUT / QUERY                           │
-└───────────────────────────────────┬────────────────────────────────────┘
-                                    │
-                                    ▼
-┌────────────────────────────────────────────────────────────────────────┐
-│                        2. DSPY ROUTER MODULE                           │
-│  - Inspects intent: Coding, Math, Direct Reasoning, or Web Search      │
-└───────────┬────────────────────────────────────────────────┬───────────┘
-            │                                                │
-   [Direct / Local Intent]                          [Needs Live Web Context]
-            │                                                │
-            ▼                                                ▼
-┌─────────────────────────┐               ┌──────────────────────────────┐
-│  LOCAL MODEL REASONING  │               │   3. SEARXNG SEARCH AGENT    │
-│  - Optimized prompt     │               │ - Queries open JSON API      │
-│  - Low latency execution│               │ - Retrieves top 3 snippets   │
-└───────────┬─────────────┘               └──────────────┬───────────────┘
-            │                                            │
-            └───────────────────────┬────────────────────┘
-                                    │
-                                    ▼
-┌────────────────────────────────────────────────────────────────────────┐
-│                   4. LOCAL GGUF INFERENCE ENGINE                       │
-│  - 3B/4B quantized local GGUF model (Qwen / Llama)                     │
-│  - Handled via llama-cpp-python (~2.0 GB Memory Footprint)             │
-└───────────────────────────────────┬────────────────────────────────────┘
-                                    │
-                                    ▼
-┌────────────────────────────────────────────────────────────────────────┐
-│                   5. RESPONSE & EVALUATION LOOP                        │
-│  - Formatted final answer returned directly                            │
-└────────────────────────────────────────────────────────────────────────┘
+```text
+User Query ──> [router.py] (intent: search or local)
+                    │
+         ┌──────────┴──────────┐
+         ▼                     ▼
+      (local)               (search)
+         │                     │
+         │              [search.py]
+         │            (top 3 snippets)
+         │                     │
+         └──────────┬──────────┘
+                    ▼
+        [model.py] Qwen3-4B generates the answer
+                    ▼
+              Final Answer
 ```
 
-## 🛠️ Tech Stack
+| Module | Role |
+| :--- | :--- |
+| `main.py` | CLI entry point and execution loop. |
+| `model.py` | Initializes local GGUF inference via `llama-cpp-python` and configures DSPy. |
+| `router.py` | DSPy-based intent classifier (`search` vs `local`). |
+| `search.py` | Fallback-enabled SearXNG web search integration. |
 
-| Component | Technology | Footprint / Resource Usage | Role | 
-| ----- | ----- | ----- | ----- | 
-| **Logic & Control** | [DSPy](https://github.com/stanfordnlp/dspy) | Minimal Python Process | Orchestrates routing, agent ReAct loops, and signatures | 
-| **Inference Engine** | `llama-cpp-python` | \~2.0 GB VRAM / System RAM | Executes local GGUF model inference | 
-| **Local Model** | Qwen 2.5 3B / Qwen 3 4B (Q4_K_M GGUF) | \~2.5 - 3.0 GB Storage | Lightweight local reasoning engine | 
-| **Search Engine** | [SearXNG](https://docs.searxng.org/) | Lightweight HTTP requests | Live, privacy-preserving web search integration | 
-
-## 📁 Repository Structure
-
-```
-route_sag/
-├── main.py            # CLI interface and main execution loop
-├── model.py           # Local GGUF initialization and DSPy LM wrapper
-├── router.py          # DSPy classification & dynamic prompt routing
-├── search.py           # SearXNG search tool integration & fallback handling
-├── models/            # Folder containing local .gguf model files
-└── README.md          # Project documentation
-```
+---
 
 ## 🚀 Quick Start
 
 ### 1. Prerequisites
+* **Python 3.10+**
+* A compatible GGUF model (e.g., Qwen3-4B-Q4_K_M)
 
-Ensure you have Python 3.10+ installed and a C/C++ compiler set up for `llama-cpp-python`.
-
+### 2. Installation
 ```bash
-git clone https://github.com/your-username/route-sag.git
-cd route-sag
+git clone https://github.com/your-username/RouteSAG.git
+cd RouteSAG
+
+python -m venv venv
+# Activate virtual environment:
+# Windows: venv\Scripts\activate
+# Mac/Linux: source venv/bin/activate
+
+pip install dspy llama-cpp-python requests
 ```
 
-### 2. Install Dependencies
-
-```bash
-pip install dspy-ai llama-cpp-python requests
+### 3. Setup Model Weights
+Place your target GGUF file in the `./models/` directory:
+```text
+RouteSAG/
+├── models/
+│   └── Qwen3-4B-Q4_K_M.gguf
 ```
 
-### 3. Download Model Weights
-
-Place your target GGUF file inside the `./models/` directory (e.g., `Qwen3-4B-Q4_K_M.gguf` or `Qwen2.5-3B-Instruct-Q4_K_M.gguf`).
-
-### 4. Run RouteSAG
-
+### 4. Run the Assistant
 ```bash
 python main.py
 ```
 
-## 📜 License
+---
 
-Distributed under the MIT License. See `LICENSE` for more information.
+## 🛠️ Tech Stack
+
+* **Orchestration:** [DSPy](https://github.com/stanfordnlp/dspy)
+* **Inference Engine:** [llama.cpp](https://github.com/ggml-org/llama.cpp) via `llama-cpp-python`
+* **Local Model:** Qwen3-4B (Q4_K_M GGUF)
+* **Search:** SearXNG (Privacy-oriented metasearch)
+
+---
+
+## 📋 Limitations & Roadmap
+
+**Limitations**
+* **Router accuracy is unmeasured.** A misrouted query can return a stale or wrong answer.
+* **Search is not private.** On the search path, the query text is sent to public SearXNG instances. Self-hosting an instance avoids this.
+* **Search quality is limited.** Only three result snippets are returned, and public instances may rate-limit or go down.
+* **The agent may skip the search.** On the search path, a small model can answer from memory without calling the tool.
+* **Small-model reliability.** A 4B model can fail at structured output and tool use.
+* **Stateless.** No conversation memory.
+
+**Roadmap:** router evaluation on a labeled query set, conversation history, streaming responses, a self-hosted search setup, and a simple web GUI.
+---
+
+## 📜 License
+Distributed under the MIT License.
