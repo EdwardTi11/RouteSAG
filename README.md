@@ -1,108 +1,124 @@
-Here is your updated `README.md` reflecting the migration to `duckduckgo-search`, the removal of `requests`, the robust `Predict`-based regex sanitization in `router.py`, and the simplified direct connection setup.
-
-```markdown
 # RouteSAG 🌿🤖
+### Route-Based System for Agentic Generation
 
-**RouteSAG** (Route-based System for Agentic Generation) is a lightweight, hybrid AI assistant that combines a local GGUF model with dynamic query routing and live web search via **duckduckgo-search**. 
+**RouteSAG** is a lightweight hybrid AI assistant built with **DSPy** that combines local Qwen3 inference with intelligent query routing and live **DuckDuckGo** search.
 
-Instead of relying on heavy external infrastructure or API keys, RouteSAG uses **DSPy** to route queries intelligently—using fast local inference for general prompts and a keyless, privacy-oriented web search only when up-to-date data is required.
+It automatically determines whether a query can be answered locally or requires up-to-date web information.
 
----
-
-## 📐 Architecture & Workflow
+## 📐 Architecture
 
 ```text
-User Query ──> [router.py] (intent: search or local)
-                     │
-          ┌──────────┴──────────┐
-          ▼                     ▼
-       (local)               (search)
-          │                     │
-          │                [search.py]
-          │             (top 3 snippets via DDGS)
-          │                     │
-          └──────────┬──────────┘
-                     ▼
-        [model.py] Qwen3-4B generates the answer
-                     ▼
-                Final Answer
-
+       User Query
+            |
+            v
+      [router.py]
+            |
+       +----+----+
+       |         |
+       v         v
+     LOCAL     SEARCH
+       |         |
+       |    [search.py]
+       |         |
+       +----+----+
+            |
+            v
+        [model.py]
+        Local Qwen3
+            |
+            v
+       Final Answer
 ```
 
-| Module | Role |
-| --- | --- |
-| `main.py` | CLI entry point and execution loop. |
-| `model.py` | Initializes local GGUF inference via `llama-cpp-python` and configures DSPy. |
-| `router.py` | DSPy `Predict`-based intent classifier with regex tag sanitization (`search` vs `local`). |
-| `search.py` | Keyless, direct DuckDuckGo search integration via `duckduckgo-search`. |
+| Module | Description |
+|---|---|
+| `main.py` | Application entry point and execution. |
+| `model.py` | Local GGUF model initialization and DSPy configuration. |
+| `router.py` | DSPy-based intent classification with regex sanitization. |
+| `search.py` | DuckDuckGo web search integration. |
 
----
+## 🚀 Installation
 
-## 🚀 Quick Start
+**Requirements:**
+- Python 3.10+
+- Compatible GGUF model
+- Internet connection for web searches
 
-### 1. Prerequisites
-
-* **Python 3.10+**
-* A compatible GGUF model (e.g., Qwen3-4B-Q4_K_M)
-
-### 2. Installation
+**1. Clone the repository**
 
 ```bash
-git clone [https://github.com/your-username/RouteSAG.git](https://github.com/your-username/RouteSAG.git)
+git clone https://github.com/your-username/RouteSAG.git
 cd RouteSAG
-
-python -m venv venv
-# Activate virtual environment:
-# Windows: venv\Scripts\activate
-# Mac/Linux: source venv/bin/activate
-
-pip install dspy llama-cpp-python duckduckgo-search
-
 ```
 
-### 3. Setup Model Weights
+**2. Create a virtual environment**
 
-Place your target GGUF file in the `./models/` directory:
+```bash
+python -m venv venv
+```
+
+Activate it:
+
+```bash
+# Windows
+venv\Scripts\activate
+
+# Linux/macOS
+source venv/bin/activate
+```
+
+**3. Install dependencies**
+
+```bash
+pip install dspy llama-cpp-python duckduckgo-search
+```
+
+**4. Add your model**
+
+Place your GGUF model in `models/`:
 
 ```text
 RouteSAG/
 ├── models/
 │   └── Qwen3-4B-Q4_K_M.gguf
-
+├── main.py
+├── model.py
+├── router.py
+└── search.py
 ```
 
-### 4. Run the Assistant
+**5. Run**
 
 ```bash
 python main.py
-
 ```
-
----
 
 ## 🛠️ Tech Stack
 
-* **Orchestration:** [DSPy](https://github.com/stanfordnlp/dspy)
-* **Inference Engine:** [llama.cpp](https://github.com/ggml-org/llama.cpp) via `llama-cpp-python`
-* **Local Model:** Qwen3-4B (Q4_K_M GGUF)
-* **Search Engine:** [duckduckgo-search](https://pypi.org/project/duckduckgo-search/) (Keyless, lightweight, privacy-focused search)
+- **[DSPy](https://github.com/stanfordnlp/dspy):** Agent orchestration and query routing.
+- **[llama.cpp](https://github.com/ggml-org/llama.cpp):** Local model inference.
+- **[Qwen3](https://github.com/QwenLM/Qwen3):** Local language model.
+- **[duckduckgo-search](https://pypi.org/project/duckduckgo-search/):** Keyless web search.
+- **Python:** Core implementation.
 
----
+## 📋 Limitations
 
-## 📋 Limitations & Roadmap
+- Router accuracy has not been formally evaluated.
+- DuckDuckGo may impose rate limits.
+- Search retrieves only the top three results.
+- Smaller models may produce inconsistent output formatting.
+- No conversational memory or persistent storage.
+- Performance depends on available hardware.
 
-**Limitations**
+## 🗺️ Roadmap
 
-* **Router accuracy is unmeasured.** A misrouted query can return a stale or wrong answer.
-* **Search rate-limiting.** Rapid, repetitive automated queries may temporarily trigger DuckDuckGo rate limits.
-* **Search snippet count.** Only three result snippets are returned to maintain low latency and fit local context windows.
-* **Small-model parsing quirks.** Smaller local models sometimes generate extra XML/text wrappers, which are cleaned via regex post-processing.
-* **Stateless.** No conversation memory.
-
-**Roadmap:** Router evaluation script (`evaluate.py`) on a labeled dataset, conversational memory, streaming responses, and a simple web GUI.
-
----
+- [ ] Router evaluation and benchmarking.
+- [ ] Conversational memory.
+- [ ] Streaming responses.
+- [ ] Web-based interface.
+- [ ] Improved search and retrieval.
+- [ ] Configurable model settings.
 
 ## 📜 License
 
-Distributed under the MIT License.
+Distributed under the **MIT License**. See `LICENSE` for details.
