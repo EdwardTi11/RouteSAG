@@ -1,11 +1,12 @@
+from typing import Literal
 import dspy
 
 class QueryIntentSignature(dspy.Signature):
-    """Decide whether answering the question requires live or recent web data."""
-    question: str = dspy.InputField(desc="User query or task")
-    intent: str = dspy.OutputField(
-        desc="Output EXACTLY 'search' if live or recent web data is mandatory, or 'local' if it is a general fact, math, or coding task. Do not wrap in tags."
-    )
+  """Determine if answering the question requires fresh, live web data or if it can be resolved with static knowledge."""
+  question: str = dspy.InputField(desc='The user query or task.')
+  intent: Literal['search', 'static'] = dspy.OutputField(
+      desc="Choose 'search' if live/recent web data or current events are required. Choose 'static' if it is a general fact, math, reasoning, or coding task."
+  )
 
 class RouteSAGRouter(dspy.Module):
     def __init__(self):

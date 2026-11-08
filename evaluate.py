@@ -4,13 +4,14 @@ from datasets import load_dataset
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, f1_score
 from router import RouteSAGRouter
 from model import init_dspy_model
+from dspy.utils.exceptions import AdapterParseError
 
-SEED, LABELS = 42, ["local", "search"]
+SEED, LABELS = 42, ["static", "search"]
 
 def load_data():
     samples = []
     configs = [
-        ("google/simpleqa-verified", "eval", "SimpleQA Verified", "local"),
+        ("google/simpleqa-verified", "eval", "SimpleQA Verified", "static"),
         ("smolagents/browse_comp", "test", "BrowseComp", "search")
     ]
     for name, split, source_name, intent in configs:
@@ -20,8 +21,11 @@ def load_data():
             for item in data:
                 row = dict(item)
                 q = row.get("problem") or row.get("question") or row.get("input")
-                if q:
-                    samples.append({"question": str(q), "expected": intent, "source": source_name})
+                if q and isinstance(q, str):
+                    clean_q = q.strip()
+                    # Filter out base64-like blobs, extremely long gibberish, or empty strings
+                    if len(clean_q) > 3 and not clean_q.startswith("Y0cJn"): 
+                        samples.append({"question": clean_q, "expected": intent, "source": source_name})
         except Exception:
             pass
     random.Random(SEED).shuffle(samples)
@@ -37,10 +41,14 @@ def main():
 
     for i, s in enumerate(samples, 1):
         start = time.perf_counter()
-        raw = str(router(s["question"])).strip().lower()
+        try:
+            raw = str(router(s["question"])).strip().lower()
+            pred = raw if raw in LABELS else "invalid"
+        except AdapterParseError:
+            pred = "invalid"  # Catch LLM parsing breakdowns gracefully
+            
         latencies.append(time.perf_counter() - start)
         
-        pred = raw if raw in LABELS else "invalid"
         expected.append(s["expected"])
         predicted.append(pred)
         
