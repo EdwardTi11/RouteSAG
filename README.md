@@ -101,9 +101,33 @@ python main.py
 - **[duckduckgo-search](https://pypi.org/project/duckduckgo-search/):** Keyless web search.
 - **Python:** Core implementation.
 
+## 📊 Router Evaluation
+
+The router was evaluated on **2,255 samples** from two datasets. The benchmark assigned `static` as the expected route for SimpleQA Verified and `search` for BrowseComp.
+
+| Metric | Result |
+|---|---:|
+| Overall accuracy | **36.19%** |
+| Macro-F1 | **0.3787** |
+| Median latency | **8.6948 seconds** |
+| SimpleQA Verified accuracy | 63.10% (631/1,000) |
+| BrowseComp accuracy | 14.74% (185/1,255) |
+
+### Classification results
+
+| Expected route | Predicted static | Predicted search | Invalid |
+|---|---:|---:|---:|
+| Static (1,000 samples) | 631 | 353 | 16 |
+| Search (1,255 samples) | 659 | 185 | 411 |
+
+The evaluation produced **427 invalid predictions** that did not match either route label. They are counted as incorrect in the overall accuracy.
+
 ## 📋 Limitations
 
-- Router accuracy has not been formally evaluated.
+- **Benchmark labels are proxies:** Each dataset was assigned a single expected route (`static` for SimpleQA Verified and `search` for BrowseComp). This is a useful initial test, but it does not establish the correct route for every individual question.
+- **Routing performance is limited:** The benchmark achieved 36.19% overall accuracy. BrowseComp routing was particularly weak at 14.74%, indicating that the router often failed to identify questions assigned to the search category.
+- **Invalid outputs:** 427 of 2,255 predictions did not match either expected label, suggesting that output formatting or label compliance remains an issue.
+- **Limited benchmark coverage:** Two datasets cannot represent the full range of real user queries or establish general real-world routing performance.
 - DuckDuckGo may impose rate limits.
 - Search retrieves only the top three results.
 - Smaller models may produce inconsistent output formatting.
@@ -112,7 +136,8 @@ python main.py
 
 ## 🗺️ Roadmap
 
-- [ ] Router evaluation and benchmarking.
+- [x] Initial router evaluation and benchmarking.
+- [ ] Improve routing accuracy and output consistency.
 - [ ] Conversational memory.
 - [ ] Streaming responses.
 - [ ] Web-based interface.
