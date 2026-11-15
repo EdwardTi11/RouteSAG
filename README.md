@@ -46,6 +46,7 @@ RouteSAG/
 ├── models/
 │   └── Qwen3-4B-Q4_K_M.gguf
 ├── main.py
+├──
 └── README.md
 ```
 
@@ -132,6 +133,8 @@ Expected routes were assigned using FreshQA's `fact_type` and `effective_year` m
 - `slow-changing` → `static` if the effective year is before 2025; otherwise `search`
 
 The 2025 threshold serves as an operational approximation of the model's knowledge boundary.
+
+For latency calculations, the numbers come from the T4 GPU, provided by Kaggle.
 
 ### Running the Evaluation
 
