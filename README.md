@@ -5,37 +5,58 @@
 
 It automatically determines whether a query can be answered locally or requires up-to-date web information.
 
+RouteSAG explores how lightweight language models can decide when to rely on internal knowledge and when to retrieve external information.
+
 ## 📐 Architecture
 
 ```text
        User Query
-            |
-            v
-      [router.py]
-            |
-       +----+----+
-       |         |
-       v         v
-     LOCAL     SEARCH
-       |         |
-       |    [search.py]
-       |         |
-       +----+----+
-            |
-            v
-        [model.py]
-        Local Qwen3
-            |
-            v
+           |
+           v
+    [model_design/router.py]
+           |
+       +---+---+
+       |       |
+       v       v
+     LOCAL   SEARCH
+       |       |
+       | [model_design/search.py]
+       |       |
+       +---+---+
+           |
+           v
+ [model_design/model.py]
+      Local Qwen3
+           |
+           v
        Final Answer
+```
+
+### Project Structure
+
+```text
+RouteSAG/
+├── evaluation/
+│   ├── evaluate.py
+│   └── FreshQA_v042126.csv
+├── model_design/
+│   ├── model.py
+│   ├── router.py
+│   └── search.py
+├── models/
+│   └── Qwen3-4B-Q4_K_M.gguf
+├── main.py
+└── README.md
 ```
 
 | Module | Description |
 |---|---|
 | `main.py` | Application entry point and execution. |
-| `model.py` | Local GGUF model initialization and DSPy configuration. |
-| `router.py` | DSPy-based intent classification with regex sanitization. |
-| `search.py` | DuckDuckGo web search integration. |
+| `model_design/model.py` | Local GGUF model initialization and DSPy configuration. |
+| `model_design/router.py` | DSPy-based intent classification with regex sanitization. |
+| `model_design/search.py` | DuckDuckGo web search integration. |
+| `evaluation/evaluate.py` | Evaluates router classification performance using FreshQA. |
+| `evaluation/FreshQA_v042126.csv` | Dataset used for router evaluation. |
 
 ## 🚀 Installation
 
@@ -78,16 +99,11 @@ pip install dspy llama-cpp-python duckduckgo-search
 Place your GGUF model in `models/`:
 
 ```text
-RouteSAG/
-├── models/
-│   └── Qwen3-4B-Q4_K_M.gguf
-├── main.py
-├── model.py
-├── router.py
-└── search.py
+models/
+└── Qwen3-4B-Q4_K_M.gguf
 ```
 
-**5. Run**
+**5. Run RouteSAG**
 
 ```bash
 python main.py
@@ -103,40 +119,67 @@ python main.py
 
 ## 📊 Router Evaluation
 
-The router was evaluated on **2,255 samples** from two datasets. The benchmark assigned `static` as the expected route for SimpleQA Verified and `search` for BrowseComp.
+The router was evaluated on **500 questions from the FreshQA TEST split** to assess whether queries require local inference (`static`) or external web search (`search`).
+
+The evaluation script and dataset are located in the `evaluation/` directory.
+
+### Evaluation Methodology
+
+Expected routes were assigned using FreshQA's `fact_type` and `effective_year` metadata:
+
+- `never-changing` → `static`
+- `fast-changing` → `search`
+- `slow-changing` → `static` if the effective year is before 2025; otherwise `search`
+
+The 2025 threshold serves as an operational approximation of the model's knowledge boundary.
+
+### Running the Evaluation
+
+From the project root:
+
+```bash
+python evaluation/evaluate.py
+```
+
+### Overall Results
 
 | Metric | Result |
 |---|---:|
-| Overall accuracy | **36.19%** |
-| Macro-F1 | **0.3787** |
-| Median latency | **8.6948 seconds** |
-| SimpleQA Verified accuracy | 63.10% (631/1,000) |
-| BrowseComp accuracy | 14.74% (185/1,255) |
+| Accuracy | **68.00%** |
+| Macro F1 | **0.6832** |
+| Search precision | 53.04% |
+| Search recall | 78.92% |
+| Invalid prediction rate | 3.20% |
+| Median latency | 7.124 seconds |
 
-### Classification results
+### Accuracy by Question Category
 
-| Expected route | Predicted static | Predicted search | Invalid |
+| Category | Accuracy |
+|---|---:|
+| Fast-changing | 82.58% (109/132) |
+| Never-changing | 71.81% (135/188) |
+| Slow-changing | 53.33% (96/180) |
+
+### Confusion Matrix
+
+| Expected Route | Predicted Static | Predicted Search | Invalid |
 |---|---:|---:|---:|
-| Static (1,000 samples) | 631 | 353 | 16 |
-| Search (1,255 samples) | 659 | 185 | 411 |
+| Static | 209 | 116 | 9 |
+| Search | 28 | 131 | 7 |
 
-The evaluation produced **427 invalid predictions** that did not match either route label. They are counted as incorrect in the overall accuracy.
+### Limitations
 
-## 📋 Limitations
-
-- **Benchmark labels are proxies:** Each dataset was assigned a single expected route (`static` for SimpleQA Verified and `search` for BrowseComp). This is a useful initial test, but it does not establish the correct route for every individual question.
-- **Routing performance is limited:** The benchmark achieved 36.19% overall accuracy. BrowseComp routing was particularly weak at 14.74%, indicating that the router often failed to identify questions assigned to the search category.
-- **Invalid outputs:** 427 of 2,255 predictions did not match either expected label, suggesting that output formatting or label compliance remains an issue.
-- **Limited benchmark coverage:** Two datasets cannot represent the full range of real user queries or establish general real-world routing performance.
-- DuckDuckGo may impose rate limits.
-- Search retrieves only the top three results.
-- Smaller models may produce inconsistent output formatting.
-- No conversational memory or persistent storage.
-- Performance depends on available hardware.
+- **Approximate knowledge boundary:** The 2025 threshold is an operational assumption, not a verified cutoff for the model's training knowledge.
+- **Proxy labels:** FreshQA metadata provides a practical labeling approach, but does not establish the correct routing decision for every individual question.
+- **Slow-changing questions:** This category currently has the lowest accuracy, suggesting that distinguishing older information from newer information remains challenging.
+- **Invalid outputs:** Some predictions do not match either expected route, indicating remaining output-consistency issues.
+- **Benchmark coverage:** FreshQA does not represent every type of real-world user query.
 
 ## 🗺️ Roadmap
 
 - [x] Initial router evaluation and benchmarking.
+- [x] FreshQA-based router evaluation.
+- [x] Temporal routing classification.
 - [ ] Improve routing accuracy and output consistency.
 - [ ] Conversational memory.
 - [ ] Streaming responses.
