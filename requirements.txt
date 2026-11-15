@@ -1,5 +1,4 @@
 ddgs==9.16.1
 dspy==3.4.1
 scikit-learn==1.9.1
-datasets==5.1.0
 llama-cpp-python==0.3.36
