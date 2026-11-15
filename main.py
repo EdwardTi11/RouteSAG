@@ -1,7 +1,7 @@
 import dspy
-from model import init_dspy_model
-from router import RouteSAGRouter
-from search import ddg_search
+from model_design.model import init_dspy_model
+from model_design.router import RouteSAGRouter
+from model_design.search import ddg_search
 
 class RouteSAGSignature(dspy.Signature):
     """Answer the question accurately and concisely. If you are unsure, say so instead of guessing."""

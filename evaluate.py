@@ -3,8 +3,8 @@ import time
 import statistics
 from datasets import load_dataset
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, f1_score
-from router import RouteSAGRouter
-from model import init_dspy_model
+from model_design.router import RouteSAGRouter
+from model_design.model import init_dspy_model
 from dspy.utils.exceptions import AdapterParseError
 
 SEED, LABELS = 42, ["static", "search"]
