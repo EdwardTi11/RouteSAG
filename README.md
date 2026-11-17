@@ -92,7 +92,7 @@ source venv/bin/activate
 **3. Install dependencies**
 
 ```bash
-pip install dspy llama-cpp-python duckduckgo-search
+pip install -r requirements.txt
 ```
 
 **4. Add your model**
