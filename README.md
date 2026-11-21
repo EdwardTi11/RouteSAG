@@ -46,7 +46,8 @@ RouteSAG/
 ├── models/
 │   └── Qwen3-4B-Q4_K_M.gguf
 ├── main.py
-├──
+├── pyproject.toml
+├── uv.lock
 └── README.md
 ```
 
@@ -63,6 +64,7 @@ RouteSAG/
 
 **Requirements:**
 - Python 3.10+
+- [uv](https://astral.sh) package manager
 - Compatible GGUF model
 - Internet connection for web searches
 
@@ -73,29 +75,15 @@ git clone https://github.com/your-username/RouteSAG.git
 cd RouteSAG
 ```
 
-**2. Create a virtual environment**
+**2. Install dependencies**
+
+This creates a `.venv` virtual environment and installs exact dependency versions from `uv.lock`:
 
 ```bash
-python -m venv venv
+uv sync
 ```
 
-Activate it:
-
-```bash
-# Windows
-venv\Scripts\activate
-
-# Linux/macOS
-source venv/bin/activate
-```
-
-**3. Install dependencies**
-
-```bash
-pip install -r requirements.txt
-```
-
-**4. Add your model**
+**3. Add your model**
 
 Place your GGUF model in `models/`:
 
@@ -104,10 +92,10 @@ models/
 └── Qwen3-4B-Q4_K_M.gguf
 ```
 
-**5. Run RouteSAG**
+**4. Run RouteSAG**
 
 ```bash
-python main.py
+uv run python main.py
 ```
 
 ## 🛠️ Tech Stack
@@ -116,6 +104,7 @@ python main.py
 - **[llama.cpp](https://github.com/ggml-org/llama.cpp):** Local model inference.
 - **[Qwen3](https://github.com/QwenLM/Qwen3):** Local language model.
 - **[ddgs](https://pypi.org/project/ddgs/):** Keyless web search.
+- **[uv](https://astral.sh):** Dependency and environment management.
 - **Python:** Core implementation.
 
 ## 📊 Router Evaluation
@@ -141,7 +130,7 @@ For latency calculations, the numbers come from the T4 GPU, provided by Kaggle.
 From the project root:
 
 ```bash
-python evaluation/evaluate.py
+uv run python evaluation/evaluate.py
 ```
 
 ### Overall Results
