@@ -115,7 +115,7 @@ python main.py
 - **[DSPy](https://github.com/stanfordnlp/dspy):** Agent orchestration and query routing.
 - **[llama.cpp](https://github.com/ggml-org/llama.cpp):** Local model inference.
 - **[Qwen3](https://github.com/QwenLM/Qwen3):** Local language model.
-- **[duckduckgo-search](https://pypi.org/project/duckduckgo-search/):** Keyless web search.
+- **[ddgs](https://pypi.org/project/ddgs/):** Keyless web search.
 - **Python:** Core implementation.
 
 ## 📊 Router Evaluation
