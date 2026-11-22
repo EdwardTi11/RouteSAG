@@ -4,25 +4,26 @@ from model_design.router import RouteSAGRouter
 from model_design.search import ddg_search
 
 class RouteSAGSignature(dspy.Signature):
-    """Answer the question accurately and concisely. If you are unsure, say so instead of guessing."""
-    question: str = dspy.InputField(desc="User query or task")
-    answer: str = dspy.OutputField(desc="Concise final answer")
+    """Answer accurately and concisely using the provided context."""
+    question: str = dspy.InputField()
+    context: str = dspy.InputField()
+    answer: str = dspy.OutputField()
 
 if __name__ == "__main__":
-    # Initialize the local GGUF model and global DSPy config
     init_dspy_model()
-    
+
     user_query = input("Enter your prompt: ")
-    
-    # 1. Route the query using the DSPy router module
-    router = RouteSAGRouter()
-    intent = router(question=user_query)
+    intent = RouteSAGRouter()(question=user_query)
     print(f"Detected Intent: {intent}")
 
+    context = ""
+
     if intent == "search":
-        agent = dspy.ReAct(RouteSAGSignature, tools=[ddg_search])
-    else:
-        agent = dspy.Predict(RouteSAGSignature)
-    result = agent(question=user_query)
-    
+        context = ddg_search(user_query)
+
+    result = dspy.Predict(RouteSAGSignature)(
+        question=user_query,
+        context=str(context)
+    )
+
     print(result.answer)
