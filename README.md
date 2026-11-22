@@ -113,7 +113,7 @@ The router was evaluated on **500 questions from the FreshQA TEST split** to ass
 
 The evaluation script and dataset are located in the `evaluation/` directory.
 
-The evaluation was conducted on Kaggle using a T4 GPU: [View the Kaggle Notebook](https://www.kaggle.com/code/edwardtitov/routesag-evaluation).
+The evaluation was conducted on Kaggle using a T4 GPU.
 
 ### Evaluation Methodology
 
