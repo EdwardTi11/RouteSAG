@@ -4,23 +4,25 @@ import dspy
 class QueryIntentSignature(dspy.Signature):
     """
     Determine whether a query requires web search or can be
-    answered using internal model knowledge.
+    answered reliably using internal model knowledge.
 
-    Choose 'search' if the query requires:
+    Choose 'search' for:
     - Current information, recent events, or live data.
-    - Multi-source research or cross-referencing.
-    - Exact URLs, current specifications, schedules, or fact-checking.
-    - Information likely to have changed, such as laws, leadership,
-      software documentation, or API behavior.
+    - Information likely to have changed, such as laws,
+      leadership, prices, schedules, or software versions.
+    - Exact URLs, current documentation, or multi-source research.
 
     Choose 'static' for:
-    - Established general, historical, or scientific knowledge.
+    - Established general, historical, and scientific knowledge.
     - Self-contained math, logic, and coding tasks.
     - Creative writing, translation, and brainstorming.
-    - Summarizing, rewriting, or analyzing user-provided content.
+    - Analyzing, summarizing, or rewriting provided content.
 
-    Search requirements override task type.
-    Do not search when the query can be reliably answered
+    Classify based on whether the answer requires up-to-date
+    external information, not merely the subject or wording
+    of the question.
+
+    Do not search when the answer can be reliably established
     using internal knowledge or provided context.
     """
     question: str = dspy.InputField(

@@ -81,7 +81,7 @@ def main():
         start = time.perf_counter()
 
         try:
-            raw = str(router(sample["question"])).strip().lower()
+            raw = str(router(question=sample["question"])).strip().lower()
             prediction = raw.strip(" '\".,-")
             if prediction not in LABELS:
                 prediction = "invalid"

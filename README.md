@@ -13,20 +13,20 @@ RouteSAG explores how lightweight language models can decide when to rely on int
        User Query
            |
            v
-    [model_design/router.py]
+   [model_design/router.py]
            |
        +---+---+
        |       |
        v       v
-     LOCAL   SEARCH
+     STATIC  SEARCH
        |       |
        | [model_design/search.py]
        |       |
        +---+---+
            |
            v
- [model_design/model.py]
-      Local Qwen3
+  [model_design/model.py]
+       Local Qwen3
            |
            v
        Final Answer
@@ -113,6 +113,8 @@ The router was evaluated on **500 questions from the FreshQA TEST split** to ass
 
 The evaluation script and dataset are located in the `evaluation/` directory.
 
+The evaluation was conducted on Kaggle using a T4 GPU: [View the Kaggle Notebook](https://www.kaggle.com/code/edwardtitov/routesag-evaluation).
+
 ### Evaluation Methodology
 
 Expected routes were assigned using FreshQA's `fact_type` and `effective_year` metadata:
@@ -123,7 +125,7 @@ Expected routes were assigned using FreshQA's `fact_type` and `effective_year` m
 
 The 2025 threshold serves as an operational approximation of the model's knowledge boundary.
 
-For latency calculations, the numbers come from the T4 GPU, provided by Kaggle.
+Latency was measured using a Kaggle T4 GPU.
 
 ### Running the Evaluation
 
@@ -137,34 +139,34 @@ uv run python evaluation/evaluate.py
 
 | Metric | Result |
 |---|---:|
-| Accuracy | **68.00%** |
-| Macro F1 | **0.6832** |
-| Search precision | 53.04% |
-| Search recall | 78.92% |
-| Invalid prediction rate | 3.20% |
-| Median latency | 7.124 seconds |
+| Accuracy | **61.60%** |
+| Macro F1 | **0.6154** |
+| Search precision | 45.86% |
+| Search recall | 86.75% |
+| Invalid prediction rate | **0.00%** |
+| Median latency | **3.357 seconds** |
 
 ### Accuracy by Question Category
 
 | Category | Accuracy |
 |---|---:|
-| Fast-changing | 82.58% (109/132) |
-| Never-changing | 71.81% (135/188) |
-| Slow-changing | 53.33% (96/180) |
+| Fast-changing | 90.91% (120/132) |
+| Never-changing | 56.91% (107/188) |
+| Slow-changing | 45.00% (81/180) |
 
 ### Confusion Matrix
 
 | Expected Route | Predicted Static | Predicted Search | Invalid |
 |---|---:|---:|---:|
-| Static | 209 | 116 | 9 |
-| Search | 28 | 131 | 7 |
+| Static | 164 | 170 | 0 |
+| Search | 22 | 144 | 0 |
 
 ### Limitations
 
 - **Approximate knowledge boundary:** The 2025 threshold is an operational assumption, not a verified cutoff for the model's training knowledge.
-- **Proxy labels:** FreshQA metadata provides a practical labeling approach, but does not establish the correct routing decision for every individual question.
-- **Slow-changing questions:** This category currently has the lowest accuracy, suggesting that distinguishing older information from newer information remains challenging.
-- **Invalid outputs:** Some predictions do not match either expected route, indicating remaining output-consistency issues.
+- **Proxy labels:** FreshQA metadata provides a practical labeling approach but does not establish the correct routing decision for every individual question.
+- **Slow-changing questions:** This category has the lowest accuracy, indicating that distinguishing older information from newer information remains challenging.
+- **Search trade-off:** The router favors search coverage, achieving 86.75% search recall at the cost of additional unnecessary searches.
 - **Benchmark coverage:** FreshQA does not represent every type of real-world user query.
 
 ## 🗺️ Roadmap
@@ -172,7 +174,8 @@ uv run python evaluation/evaluate.py
 - [x] Initial router evaluation and benchmarking.
 - [x] FreshQA-based router evaluation.
 - [x] Temporal routing classification.
-- [ ] Improve routing accuracy and output consistency.
+- [x] Zero invalid predictions.
+- [x] Complete core routing and inference pipeline.
 - [ ] Conversational memory.
 - [ ] Streaming responses.
 - [ ] Web-based interface.
