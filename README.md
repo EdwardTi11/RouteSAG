@@ -169,19 +169,6 @@ uv run python evaluation/evaluate.py
 - **Search trade-off:** The router favors search coverage, achieving 86.75% search recall at the cost of additional unnecessary searches.
 - **Benchmark coverage:** FreshQA does not represent every type of real-world user query.
 
-## 🗺️ Roadmap
-
-- [x] Initial router evaluation and benchmarking.
-- [x] FreshQA-based router evaluation.
-- [x] Temporal routing classification.
-- [x] Zero invalid predictions.
-- [x] Complete core routing and inference pipeline.
-- [ ] Conversational memory.
-- [ ] Streaming responses.
-- [ ] Web-based interface.
-- [ ] Improved search and retrieval.
-- [ ] Configurable model settings.
-
 ## 📜 License
 
 Distributed under the **MIT License**. See `LICENSE` for details.
